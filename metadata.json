@@ -1,0 +1,6 @@
+{
+  "name": "PDF/A Converter",
+  "description": "Convert PDF documents to PDF/A archival standard compliance format with metadata editing, UI download, and REST API support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
