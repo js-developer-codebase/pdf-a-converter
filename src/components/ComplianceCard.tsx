@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { ComplianceReport } from '../types';
-import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { FontDebugger } from './FontDebugger';
+import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp, Bug } from 'lucide-react';
 
 interface ComplianceCardProps {
   report: ComplianceReport;
+  onAutoRepairFonts?: () => void;
+  isRepairingFonts?: boolean;
 }
 
-export const ComplianceCard: React.FC<ComplianceCardProps> = ({ report }) => {
+export const ComplianceCard: React.FC<ComplianceCardProps> = ({
+  report,
+  onAutoRepairFonts,
+  isRepairingFonts = false,
+}) => {
   const [expanded, setExpanded] = useState(true);
+  const [showFontDebugger, setShowFontDebugger] = useState(false);
 
   const getSeverityBadge = (severity: string, passed: boolean) => {
     if (passed) {
@@ -35,7 +43,7 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({ report }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden space-y-4">
       
       {/* Header Banner */}
       <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -60,8 +68,22 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({ report }) => {
           </div>
         </div>
 
-        {/* Score Pill */}
+        {/* Score Pill & Font Debugger Toggle */}
         <div className="flex items-center space-x-3 self-end sm:self-center">
+          {report.fontDebugReport && (
+            <button
+              onClick={() => setShowFontDebugger(!showFontDebugger)}
+              className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                showFontDebugger
+                  ? 'bg-indigo-500 text-white shadow-xs'
+                  : 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-400/30'
+              }`}
+            >
+              <Bug className="w-3.5 h-3.5" />
+              <span>{showFontDebugger ? 'Hide Font Debugger' : 'Inspect Font Programs'}</span>
+            </button>
+          )}
+
           <div className="text-right">
             <span className="text-xs text-slate-400 block font-medium">Archival Index</span>
             <span className={`text-xl font-extrabold tracking-tight ${
@@ -81,6 +103,17 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({ report }) => {
         </div>
 
       </div>
+
+      {/* Font Debugger Drawer */}
+      {showFontDebugger && report.fontDebugReport && (
+        <div className="px-5 sm:px-6 pt-2">
+          <FontDebugger
+            report={report.fontDebugReport}
+            onAutoRepair={onAutoRepairFonts}
+            isRepairing={isRepairingFonts}
+          />
+        </div>
+      )}
 
       {/* Expanded Checklist */}
       {expanded && (
@@ -113,6 +146,17 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({ report }) => {
                       {item.details}
                     </p>
                   )}
+
+                  {/* Quick link to Font Debugger if font check failed */}
+                  {item.category === 'Font' && report.fontDebugReport && (
+                    <button
+                      onClick={() => setShowFontDebugger(true)}
+                      className="mt-1.5 inline-flex items-center space-x-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
+                    >
+                      <Bug className="w-3 h-3" />
+                      <span>Debug Font Dictionaries ({report.fontDebugReport.totalFonts} fonts inspected)</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="shrink-0">
@@ -127,3 +171,4 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({ report }) => {
     </div>
   );
 };
+

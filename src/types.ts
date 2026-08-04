@@ -14,6 +14,27 @@ export interface PdfMetadata {
   identifier?: string;
 }
 
+export interface FontDebugDetails {
+  objRef: string;
+  fontName: string;
+  subtype: string;
+  hasDescriptor: boolean;
+  descriptorRef?: string;
+  fontStreamType: 'FontFile' | 'FontFile2' | 'FontFile3' | 'None';
+  fontStreamBytes: number;
+  hasCidSet: boolean;
+  cidSetBytes: number;
+  isEmbedded: boolean;
+  statusReason: string;
+}
+
+export interface FontDebuggerReport {
+  totalFonts: number;
+  embeddedCount: number;
+  missingCount: number;
+  fonts: FontDebugDetails[];
+}
+
 export interface ComplianceCheckItem {
   id: string;
   category: 'Metadata' | 'ColorProfile' | 'Structure' | 'Security' | 'Font';
@@ -32,6 +53,7 @@ export interface ComplianceReport {
   fileSize: number;
   pageCount: number;
   checks: ComplianceCheckItem[];
+  fontDebugReport?: FontDebuggerReport;
   summary: string;
 }
 

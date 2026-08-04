@@ -373,7 +373,11 @@ export default function App() {
                       onDownload={handleDownload}
                     />
 
-                    <ComplianceCard report={convertedResult.complianceReport} />
+                    <ComplianceCard
+                      report={convertedResult.complianceReport}
+                      onAutoRepairFonts={handleManualConvert}
+                      isRepairingFonts={isProcessing}
+                    />
                   </>
                 ) : (
                   <div className="bg-white rounded-2xl border border-slate-200/90 p-12 text-center text-slate-400 flex flex-col items-center justify-center h-full min-h-[350px]">

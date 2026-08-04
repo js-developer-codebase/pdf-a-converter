@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { ComplianceReport, PdfaConformanceLevel } from '../types';
 import { validatePdfaCompliance } from '../lib/pdfa-validator';
+import { convertToPdfa } from '../lib/pdfa-converter';
 import { ComplianceCard } from './ComplianceCard';
-import { ShieldCheck, Upload, FileText, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { ShieldCheck, Upload, FileText, AlertCircle, ArrowUpRight, Wrench } from 'lucide-react';
 
 export const InspectorView: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [rawBytes, setRawBytes] = useState<Uint8Array | null>(null);
   const [targetLevel, setTargetLevel] = useState<PdfaConformanceLevel>('PDF/A-2b');
   const [isAuditing, setIsAuditing] = useState(false);
+  const [isRepairing, setIsRepairing] = useState(false);
   const [report, setReport] = useState<ComplianceReport | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,12 +25,31 @@ export const InspectorView: React.FC = () => {
     try {
       const buffer = await file.arrayBuffer();
       const bytes = new Uint8Array(buffer);
+      setRawBytes(bytes);
       const rep = await validatePdfaCompliance(bytes, level);
       setReport(rep);
     } catch (err) {
       console.error('Audit failed', err);
     } finally {
       setIsAuditing(false);
+    }
+  };
+
+  const handleAutoRepairFonts = async () => {
+    if (!rawBytes) return;
+    setIsRepairing(true);
+    try {
+      const { pdfaBytes } = await convertToPdfa(rawBytes, {
+        title: selectedFile?.name.replace(/\.pdf$/i, '') || 'Audited PDF Document',
+        conformanceLevel: targetLevel,
+      });
+      setRawBytes(pdfaBytes);
+      const newReport = await validatePdfaCompliance(pdfaBytes, targetLevel);
+      setReport(newReport);
+    } catch (err) {
+      console.error('Font repair failed', err);
+    } finally {
+      setIsRepairing(false);
     }
   };
 
@@ -41,9 +63,9 @@ export const InspectorView: React.FC = () => {
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900">ISO 19005 Compliance Auditor</h2>
+            <h2 className="text-base font-bold text-slate-900">ISO 19005 Compliance Auditor & Debugger</h2>
             <p className="text-xs text-slate-500">
-              Upload any PDF file to audit for XMP RDF metadata streams, OutputIntent sRGB color profiles, structure, and security restrictions.
+              Upload any PDF file to audit and debug font program embedding, XMP RDF streams, OutputIntent color profiles, and document structure.
             </p>
           </div>
         </div>
@@ -94,7 +116,11 @@ export const InspectorView: React.FC = () => {
       )}
 
       {report && !isAuditing && (
-        <ComplianceCard report={report} />
+        <ComplianceCard
+          report={report}
+          onAutoRepairFonts={handleAutoRepairFonts}
+          isRepairingFonts={isRepairing}
+        />
       )}
 
     </div>
