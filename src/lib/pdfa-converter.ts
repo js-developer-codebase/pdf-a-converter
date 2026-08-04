@@ -110,87 +110,8 @@ function generateXmpMetadataXml(metadata: PdfMetadata): string {
  * Complies with IEC 61966-2.1 and ISO 19005 requirements for OutputIntents.
  */
 function createSrgbProfileBytes(): Uint8Array {
-  return new Uint8Array([
-    // Header (128 bytes)
-    0x00, 0x00, 0x02, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x02, 0x10, 0x00, 0x00,
-    0x6d, 0x6e, 0x74, 0x72, 0x52, 0x47, 0x42, 0x20, 0x58, 0x59, 0x5a, 0x20,
-    0x07, 0xe2, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x61, 0x63, 0x73, 0x70, 0x4d, 0x53, 0x46, 0x54, 0x00, 0x00, 0x00, 0x00,
-    0x49, 0x45, 0x43, 0x20, 0x73, 0x52, 0x47, 0x42, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf6, 0xd6,
-    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0xd3, 0x2d, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-
-    // Tag Count: 10 tags
-    0x00, 0x00, 0x00, 0x0a,
-
-    // Tag Table (10 entries * 12 bytes = 120 bytes)
-    // 1. 'desc' tag
-    0x64, 0x65, 0x73, 0x63, 0x00, 0x00, 0x00, 0xf8, 0x00, 0x00, 0x00, 0x6c,
-    // 2. 'cprt' tag
-    0x63, 0x70, 0x72, 0x74, 0x00, 0x00, 0x01, 0x64, 0x00, 0x00, 0x00, 0x28,
-    // 3. 'wtpt' tag
-    0x77, 0x74, 0x70, 0x74, 0x00, 0x00, 0x01, 0x8c, 0x00, 0x00, 0x00, 0x14,
-    // 4. 'bkpt' tag
-    0x62, 0x6b, 0x70, 0x74, 0x00, 0x00, 0x01, 0xa0, 0x00, 0x00, 0x00, 0x14,
-    // 5. 'rXYZ' tag
-    0x72, 0x58, 0x59, 0x5a, 0x00, 0x00, 0x01, 0xb4, 0x00, 0x00, 0x00, 0x14,
-    // 6. 'gXYZ' tag
-    0x67, 0x58, 0x59, 0x5a, 0x00, 0x00, 0x01, 0xc8, 0x00, 0x00, 0x00, 0x14,
-    // 7. 'bXYZ' tag
-    0x62, 0x58, 0x59, 0x5a, 0x00, 0x00, 0x01, 0xdc, 0x00, 0x00, 0x00, 0x14,
-    // 8. 'rTRC' tag
-    0x72, 0x54, 0x52, 0x43, 0x00, 0x00, 0x01, 0xf0, 0x00, 0x00, 0x00, 0x0e,
-    // 9. 'gTRC' tag
-    0x67, 0x54, 0x52, 0x43, 0x00, 0x00, 0x01, 0xf0, 0x00, 0x00, 0x00, 0x0e,
-    // 10. 'bTRC' tag
-    0x62, 0x54, 0x52, 0x43, 0x00, 0x00, 0x01, 0xf0, 0x00, 0x00, 0x00, 0x0e,
-
-    // Tag Data
-    // desc tag data (108 bytes)
-    0x64, 0x65, 0x73, 0x63, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,
-    0x73, 0x52, 0x47, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-
-    // cprt tag data (40 bytes)
-    0x74, 0x65, 0x78, 0x74, 0x00, 0x00, 0x00, 0x00, 0x43, 0x6f, 0x70, 0x79,
-    0x72, 0x69, 0x67, 0x68, 0x74, 0x20, 0x28, 0x63, 0x29, 0x20, 0x49, 0x45,
-    0x43, 0x20, 0x73, 0x52, 0x47, 0x42, 0x20, 0x50, 0x72, 0x6f, 0x66, 0x69,
-    0x6c, 0x65, 0x00, 0x00,
-
-    // wtpt tag data (20 bytes)
-    0x58, 0x59, 0x5a, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf6, 0xd6,
-    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0xd3, 0x2d,
-
-    // bkpt tag data (20 bytes)
-    0x58, 0x59, 0x5a, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-
-    // rXYZ tag data (20 bytes)
-    0x58, 0x59, 0x5a, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6f, 0xa2,
-    0x00, 0x00, 0x38, 0xf5, 0x00, 0x00, 0x03, 0x90,
-
-    // gXYZ tag data (20 bytes)
-    0x58, 0x59, 0x5a, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x62, 0x99,
-    0x00, 0x00, 0xb7, 0x85, 0x00, 0x00, 0x18, 0xda,
-
-    // bXYZ tag data (20 bytes)
-    0x58, 0x59, 0x5a, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0x9d,
-    0x00, 0x00, 0x0f, 0x70, 0x00, 0x00, 0xb6, 0xcf,
-
-    // rTRC / gTRC / bTRC tag data (14 bytes)
-    0x63, 0x75, 0x72, 0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
-    0x02, 0x33
-  ]);
+  const base64 = 'AAAByGxjbXMCEAAAbW50clJHQiBYWVogB+IAAwAUAAkADgAdYWNzcE1TRlQAAAAAc2F3c2N0cmwAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y1oYW5knZEAPUCAsD1AdCyBnqUijgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJZGVzYwAAAPAAAABfY3BydAAAAQwAAAAMd3RwdAAAARgAAAAUclhZWgAAASwAAAAUZ1hZWgAAAUAAAAAUYlhZWgAAAVQAAAAUclRSQwAAAWgAAABgZ1RSQwAAAWgAAABgYlRSQwAAAWgAAABgZGVzYwAAAAAAAAAFdVJHQgAAAAAAAAAAAAAAAHRleHQAAAAAQ0MwAFhZWiAAAAAAAADzVAABAAAAARbJWFlaIAAAAAAAAG+gAAA48gAAA49YWVogAAAAAAAAYpYAALeJAAAY2lhZWiAAAAAAAAAkoAAAD4UAALbEY3VydgAAAAAAAAAqAAAAfAD4AZwCdQODBMkGTggSChgMYg70Ec8U9hhqHC4gQySsKWoufjPrObM/1kZXTTZUdlwXZB1shnVWfo2ILJI2nKunjLLbvpnKx9dl5Hfx+f//';
+  return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
 }
 
 /**
@@ -342,27 +263,34 @@ function sanitizeFontsForPdfa(pdfDoc: PDFDocument): void {
 
       if (isFontObj) {
         // Handle Type0 Composite Fonts with DescendantFonts
-        if (subtypeStr === '/Type0' && obj.has(PDFName.of('DescendantFonts'))) {
-          const descendants = obj.get(PDFName.of('DescendantFonts'));
-          const descArray = pdfDoc.context.lookup(descendants);
-          if (Array.isArray(descArray) || (descArray && 'array' in descArray)) {
-            const arr = (descArray as any).array || descArray;
-            for (const descItem of arr) {
-              const descFontObj = pdfDoc.context.lookup(descItem);
-              if (descFontObj instanceof PDFDict) {
-                if (!descFontObj.has(PDFName.of('FontDescriptor'))) {
-                  const baseFont = obj.get(PDFName.of('BaseFont'))?.toString();
-                  descFontObj.set(PDFName.of('FontDescriptor'), createDescriptorDict(baseFont));
-                } else {
-                  const descRef = descFontObj.get(PDFName.of('FontDescriptor'));
-                  const descDict = pdfDoc.context.lookup(descRef);
-                  if (descDict instanceof PDFDict) {
-                    ensureDescriptorKeys(descDict);
+        if (subtypeStr === '/Type0') {
+          if (obj.has(PDFName.of('DescendantFonts'))) {
+            const descendants = obj.get(PDFName.of('DescendantFonts'));
+            const descArray = pdfDoc.context.lookup(descendants);
+            if (Array.isArray(descArray) || (descArray && 'array' in descArray)) {
+              const arr = (descArray as any).array || descArray;
+              for (const descItem of arr) {
+                const descFontObj = pdfDoc.context.lookup(descItem);
+                if (descFontObj instanceof PDFDict) {
+                  if (!descFontObj.has(PDFName.of('FontDescriptor'))) {
+                    const baseFont = obj.get(PDFName.of('BaseFont'))?.toString();
+                    descFontObj.set(PDFName.of('FontDescriptor'), createDescriptorDict(baseFont));
+                  } else {
+                    const descRef = descFontObj.get(PDFName.of('FontDescriptor'));
+                    const descDict = pdfDoc.context.lookup(descRef);
+                    if (descDict instanceof PDFDict) {
+                      ensureDescriptorKeys(descDict);
+                    }
                   }
                 }
               }
             }
           }
+          continue; // Type0 fonts don't have FontDescriptors on themselves
+        }
+
+        if (subtypeStr === '/Type3') {
+          continue; // Type3 fonts don't use FontDescriptors
         }
 
         // Standard fonts or fonts missing FontDescriptor directly
@@ -386,47 +314,77 @@ function sanitizeFontsForPdfa(pdfDoc: PDFDocument): void {
  * to comply with ISO 19005-1 / ISO 19005-2 PDF/A transparency requirements.
  */
 function sanitizeTransparencyForPdfa(pdfDoc: PDFDocument): void {
-  const indirectObjects = pdfDoc.context.enumerateIndirectObjects();
+  const visited = new Set<any>();
 
-  for (const [, obj] of indirectObjects) {
-    if (obj instanceof PDFDict) {
-      const type = obj.get(PDFName.of('Type'));
+  const sanitizeDict = (dict: PDFDict) => {
+    if (visited.has(dict)) return;
+    visited.add(dict);
 
-      // 1. Sanitize ExtGState dictionaries
-      if (type && type.toString() === '/ExtGState') {
-        obj.delete(PDFName.of('SMask'));
-        obj.set(PDFName.of('ca'), pdfDoc.context.obj(1.0));
-        obj.set(PDFName.of('CA'), pdfDoc.context.obj(1.0));
-        obj.delete(PDFName.of('BM'));
-      }
+    const type = dict.get(PDFName.of('Type'));
 
-      // Check ExtGState dictionaries that might not have /Type /ExtGState
-      if (obj.has(PDFName.of('ca')) || obj.has(PDFName.of('CA')) || obj.has(PDFName.of('SMask'))) {
-        obj.delete(PDFName.of('SMask'));
-        if (obj.has(PDFName.of('ca'))) obj.set(PDFName.of('ca'), pdfDoc.context.obj(1.0));
-        if (obj.has(PDFName.of('CA'))) obj.set(PDFName.of('CA'), pdfDoc.context.obj(1.0));
-        if (obj.has(PDFName.of('BM'))) obj.delete(PDFName.of('BM'));
-      }
+    // 1. Sanitize ExtGState dictionaries
+    if (type && type.toString() === '/ExtGState') {
+      dict.delete(PDFName.of('SMask'));
+      dict.delete(PDFName.of('ca'));
+      dict.delete(PDFName.of('CA'));
+      dict.delete(PDFName.of('BM'));
+    }
 
-      // 2. Sanitize XObjects (Form / Image)
-      if (type && type.toString() === '/XObject') {
-        obj.delete(PDFName.of('SMask'));
-        const group = obj.get(PDFName.of('Group'));
-        if (group instanceof PDFDict) {
-          group.set(PDFName.of('S'), PDFName.of('Color'));
-          group.set(PDFName.of('CS'), PDFName.of('DeviceRGB'));
-        }
-      }
+    // Check ExtGState dictionaries that might not have /Type /ExtGState
+    if (dict.has(PDFName.of('ca')) || dict.has(PDFName.of('CA')) || dict.has(PDFName.of('SMask'))) {
+      dict.delete(PDFName.of('SMask'));
+      dict.delete(PDFName.of('ca'));
+      dict.delete(PDFName.of('CA'));
+      dict.delete(PDFName.of('BM'));
+    }
 
-      // 3. Sanitize Page Group Dictionaries
-      if (type && type.toString() === '/Page') {
-        const group = obj.get(PDFName.of('Group'));
-        if (group instanceof PDFDict) {
-          group.set(PDFName.of('S'), PDFName.of('Color'));
-          group.set(PDFName.of('CS'), PDFName.of('DeviceRGB'));
+    // 2. Sanitize XObjects (Form / Image)
+    if (type && type.toString() === '/XObject') {
+      dict.delete(PDFName.of('SMask'));
+      const groupRef = dict.get(PDFName.of('Group'));
+      if (groupRef) {
+        const group = pdfDoc.context.lookup(groupRef);
+        if (group instanceof PDFDict && group.get(PDFName.of('S'))?.toString() === '/Transparency') {
+          dict.delete(PDFName.of('Group'));
         }
       }
     }
+
+    // 3. Sanitize Page Group Dictionaries
+    if (type && type.toString() === '/Page') {
+      const groupRef = dict.get(PDFName.of('Group'));
+      if (groupRef) {
+        const group = pdfDoc.context.lookup(groupRef);
+        if (group instanceof PDFDict && group.get(PDFName.of('S'))?.toString() === '/Transparency') {
+          dict.delete(PDFName.of('Group'));
+        }
+      }
+    }
+
+    // Recurse into values
+    for (const key of dict.keys()) {
+      traverse(dict.get(key));
+    }
+  };
+
+  const traverse = (obj: any) => {
+    if (!obj) return;
+    if (obj instanceof PDFDict) {
+      sanitizeDict(obj);
+    } else if (obj instanceof PDFArray) {
+      if (visited.has(obj)) return;
+      visited.add(obj);
+      for (let i = 0; i < obj.size(); i++) {
+        traverse(obj.get(i));
+      }
+    } else if (obj instanceof PDFStream || obj instanceof PDFRawStream) {
+      if (obj.dict) sanitizeDict(obj.dict);
+    }
+  };
+
+  const indirectObjects = pdfDoc.context.enumerateIndirectObjects();
+  for (const [, obj] of indirectObjects) {
+    traverse(obj);
   }
 }
 
