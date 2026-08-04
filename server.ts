@@ -50,10 +50,20 @@ async function startServer() {
       let rawFilename = 'document.pdf';
       let metadataInput: Partial<PdfMetadata> = {};
 
+      const standardKeys = ['title', 'author', 'subject', 'keywords', 'creator', 'producer', 'conformanceLevel', 'creationDate', 'modDate', 'download', 'pdfBase64', 'filename', 'metadata'];
+      let custom: Record<string, string> = {};
+
       // Handle multipart file upload vs JSON base64
       if (req.file) {
         pdfBuffer = req.file.buffer;
         rawFilename = req.file.originalname || 'document.pdf';
+        
+        for (const key of Object.keys(req.body)) {
+          if (!standardKeys.includes(key)) {
+            custom[key] = String(req.body[key]);
+          }
+        }
+
         metadataInput = {
           title: req.body.title,
           author: req.body.author,
@@ -64,20 +74,32 @@ async function startServer() {
           conformanceLevel: req.body.conformanceLevel as PdfaConformanceLevel,
           creationDate: req.body.creationDate,
           modDate: req.body.modDate,
+          custom: custom
         };
       } else if (req.body.pdfBase64) {
         const base64Clean = req.body.pdfBase64.replace(/^data:application\/pdf;base64,/, '');
         pdfBuffer = Buffer.from(base64Clean, 'base64');
         rawFilename = req.body.filename || 'document.pdf';
-        metadataInput = req.body.metadata || {
-          title: req.body.title,
-          author: req.body.author,
-          subject: req.body.subject,
-          keywords: req.body.keywords,
-          creator: req.body.creator,
-          producer: req.body.producer,
-          conformanceLevel: req.body.conformanceLevel,
-        };
+        
+        if (req.body.metadata) {
+          metadataInput = req.body.metadata;
+        } else {
+          for (const key of Object.keys(req.body)) {
+            if (!standardKeys.includes(key)) {
+              custom[key] = String(req.body[key]);
+            }
+          }
+          metadataInput = {
+            title: req.body.title,
+            author: req.body.author,
+            subject: req.body.subject,
+            keywords: req.body.keywords,
+            creator: req.body.creator,
+            producer: req.body.producer,
+            conformanceLevel: req.body.conformanceLevel,
+            custom: custom
+          };
+        }
       }
 
       if (!pdfBuffer || pdfBuffer.length === 0) {
@@ -110,6 +132,7 @@ async function startServer() {
         conformanceLevel,
         creationDate: metadataInput.creationDate,
         modDate: metadataInput.modDate,
+        custom: metadataInput.custom,
       };
 
       // Convert to PDF/A

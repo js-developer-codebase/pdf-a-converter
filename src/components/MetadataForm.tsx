@@ -1,6 +1,6 @@
 import React from 'react';
 import { PdfMetadata, PdfaConformanceLevel } from '../types';
-import { Tag, User, BookOpen, Layers, Shield, Calendar, Sparkles, Wand2 } from 'lucide-react';
+import { Tag, User, BookOpen, Layers, Shield, Calendar, Sparkles, Wand2, Plus, Trash2 } from 'lucide-react';
 
 interface MetadataFormProps {
   metadata: PdfMetadata;
@@ -23,6 +23,43 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
       ...metadata,
       [name]: value,
     });
+  };
+
+  const handleCustomKeyChange = (oldKey: string, newKey: string) => {
+    const custom = { ...(metadata.custom || {}) };
+    if (oldKey !== newKey) {
+      custom[newKey] = custom[oldKey];
+      delete custom[oldKey];
+      onChange({ ...metadata, custom });
+    }
+  };
+
+  const handleCustomValueChange = (key: string, value: string) => {
+    onChange({
+      ...metadata,
+      custom: {
+        ...(metadata.custom || {}),
+        [key]: value
+      }
+    });
+  };
+
+  const addCustomField = () => {
+    const custom = { ...(metadata.custom || {}) };
+    let i = 1;
+    let newKey = `CustomField${i}`;
+    while (newKey in custom) {
+      i++;
+      newKey = `CustomField${i}`;
+    }
+    custom[newKey] = '';
+    onChange({ ...metadata, custom });
+  };
+
+  const removeCustomField = (key: string) => {
+    const custom = { ...(metadata.custom || {}) };
+    delete custom[key];
+    onChange({ ...metadata, custom });
   };
 
   const applyPreset = (presetName: string) => {
@@ -286,6 +323,57 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
           />
         </div>
 
+      </div>
+
+      {/* Custom Metadata Fields */}
+      <div className="pt-4 border-t border-slate-100">
+        <div className="flex items-center justify-between mb-3">
+          <label className="block text-xs font-semibold text-slate-700">
+            Custom Metadata Fields
+          </label>
+          <button
+            type="button"
+            onClick={addCustomField}
+            className="inline-flex items-center space-x-1 px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            <span>Add Field</span>
+          </button>
+        </div>
+        
+        {metadata.custom && Object.keys(metadata.custom).length > 0 ? (
+          <div className="space-y-2">
+            {Object.entries(metadata.custom).map(([k, v], idx) => (
+              <div key={idx} className="flex gap-2">
+                <input
+                  type="text"
+                  value={k}
+                  onChange={(e) => handleCustomKeyChange(k, e.target.value)}
+                  placeholder="Key (e.g. District)"
+                  className="w-1/3 px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900"
+                />
+                <input
+                  type="text"
+                  value={v}
+                  onChange={(e) => handleCustomValueChange(k, e.target.value)}
+                  placeholder="Value"
+                  className="flex-1 px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeCustomField(k)}
+                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-lg border border-slate-100 border-dashed text-center">
+            No custom metadata fields. Click 'Add Field' to append dynamic attributes like District, Deed No, etc.
+          </div>
+        )}
       </div>
 
     </div>

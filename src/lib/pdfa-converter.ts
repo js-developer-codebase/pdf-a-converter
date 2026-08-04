@@ -64,6 +64,47 @@ function generateXmpMetadataXml(metadata: PdfMetadata): string {
   const isoCreateDate = createDate.toISOString();
   const isoModDate = modDate.toISOString();
 
+  let customRdf = '';
+  let extensionSchemaRdf = '';
+  if (metadata.custom && Object.keys(metadata.custom).length > 0) {
+    const customEntries = Object.entries(metadata.custom)
+      .map(([k, v]) => ({ key: k.replace(/[^a-zA-Z0-9_]/g, ''), val: v }))
+      .filter(e => e.key);
+
+    if (customEntries.length > 0) {
+      customRdf = `\n    <rdf:Description rdf:about="" xmlns:pdfx="http://ns.adobe.com/pdfx/1.3/">\n`;
+      let propertyDefs = '';
+
+      for (const { key, val } of customEntries) {
+        customRdf += `      <pdfx:${key}>${escapeXml(val)}</pdfx:${key}>\n`;
+        propertyDefs += `                <rdf:li rdf:parseType="Resource">
+                  <pdfaProperty:name>${key}</pdfaProperty:name>
+                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+                  <pdfaProperty:category>external</pdfaProperty:category>
+                  <pdfaProperty:description>Custom Property: ${key}</pdfaProperty:description>
+                </rdf:li>\n`;
+      }
+      customRdf += `    </rdf:Description>`;
+
+      extensionSchemaRdf = `
+    <rdf:Description rdf:about="" xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/" xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#" xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">
+      <pdfaExtension:schemas>
+        <rdf:Bag>
+          <rdf:li rdf:parseType="Resource">
+            <pdfaSchema:schema>Custom Document Properties</pdfaSchema:schema>
+            <pdfaSchema:namespaceURI>http://ns.adobe.com/pdfx/1.3/</pdfaSchema:namespaceURI>
+            <pdfaSchema:prefix>pdfx</pdfaSchema:prefix>
+            <pdfaSchema:property>
+              <rdf:Seq>
+${propertyDefs}              </rdf:Seq>
+            </pdfaSchema:property>
+          </rdf:li>
+        </rdf:Bag>
+      </pdfaExtension:schemas>
+    </rdf:Description>`;
+    }
+  }
+
   return `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="PDF/A Archival Converter v1.0">
   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -99,7 +140,7 @@ function generateXmpMetadataXml(metadata: PdfMetadata): string {
       <xmp:CreateDate>${isoCreateDate}</xmp:CreateDate>
       <xmp:ModifyDate>${isoModDate}</xmp:ModifyDate>
       <xmp:MetadataDate>${isoModDate}</xmp:MetadataDate>
-    </rdf:Description>
+    </rdf:Description>${customRdf}${extensionSchemaRdf}
   </rdf:RDF>
 </x:xmpmeta>
 <?xpacket end="w"?>`;
@@ -133,6 +174,24 @@ export async function extractPdfMetadata(pdfBytes: Uint8Array): Promise<{
     const creationDate = pdfDoc.getCreationDate();
     const modDate = pdfDoc.getModificationDate();
 
+    const custom: Record<string, string> = {};
+    const infoDictRef = pdfDoc.context.trailerInfo.Info;
+    if (infoDictRef) {
+      const infoDict = pdfDoc.context.lookup(infoDictRef);
+      if (infoDict instanceof PDFDict) {
+        const standardKeys = ['Title', 'Author', 'Subject', 'Keywords', 'Creator', 'Producer', 'CreationDate', 'ModDate', 'Trapped'];
+        for (const key of infoDict.keys()) {
+          const keyName = key.decodeText();
+          if (!standardKeys.includes(keyName)) {
+            const val = infoDict.get(key);
+            if (val instanceof PDFString || val instanceof PDFHexString) {
+              custom[keyName] = val.decodeText();
+            }
+          }
+        }
+      }
+    }
+
     return {
       metadata: {
         title: title || '',
@@ -144,6 +203,7 @@ export async function extractPdfMetadata(pdfBytes: Uint8Array): Promise<{
         creationDate: creationDate ? creationDate.toISOString().split('T')[0] : '',
         modDate: modDate ? modDate.toISOString().split('T')[0] : '',
         conformanceLevel: 'PDF/A-2b',
+        custom,
       },
       pageCount: pdfDoc.getPageCount(),
       fileSize: pdfBytes.length,
@@ -467,6 +527,15 @@ export async function convertToPdfa(
       infoDict.set(PDFName.of('Keywords'), PDFString.of(keywords));
       infoDict.set(PDFName.of('Creator'), PDFString.of(creator));
       infoDict.set(PDFName.of('Producer'), PDFString.of(producer));
+
+      if (metadata.custom) {
+        for (const [key, value] of Object.entries(metadata.custom)) {
+          const safeKey = key.replace(/[^a-zA-Z0-9_]/g, '');
+          if (safeKey) {
+            infoDict.set(PDFName.of(safeKey), PDFString.of(value));
+          }
+        }
+      }
     }
   }
 
@@ -480,6 +549,7 @@ export async function convertToPdfa(
     creationDate: creationDate.toISOString(),
     modDate: modDate.toISOString(),
     conformanceLevel,
+    custom: metadata.custom || {},
   };
 
   // 2. Inject XMP RDF Metadata Stream (/Metadata)

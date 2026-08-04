@@ -12,6 +12,7 @@ export interface PdfMetadata {
   conformanceLevel?: PdfaConformanceLevel;
   language?: string;
   identifier?: string;
+  custom?: Record<string, string>;
 }
 
 export interface FontDebugDetails {
